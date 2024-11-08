@@ -6,6 +6,7 @@
 > The course entry code is EVGWRX. Please register with your official ULiège email address
 
 *October 23rd, 2024*
+
 The goal of this second assignment is to help you better understand the important notions of bias and variance. The first part is purely theoretical, while the second part requires to perform some experiments with Scikit-learn. You should hand in a brief report giving your developments, observations and conclusions along with the scripts you have implemented to answer the questions of the second part. The project must be carried out by groups of at most three students and submitted on Gradescope1 before $November 22, 23:59 GMT+2$. There will be two projects to submit to: one for your python scripts and
 one for your report.
 
@@ -19,7 +20,7 @@ Let us consider a unidimensional regression problem $y = f(x) + ϵ$ where $ϵ �
 
    $\{x^1, \ldots, x^N\} = \{0\} \cup \left\{ \frac{i}{N'} \, \bigg| \, i = 1, \ldots, N' \right\} \cup \left\{ -\frac{i}{N'} \, \bigg| \, i = 1, \ldots, N' \right\}$
 
-    with $N′ > 1$ an arbitrary integer value. The $N (= 2N′ + 1)$ points thus form an uniform grid in [−1; +1]. Using the result in (1), express analytically the bias and variance terms of the $kNN$ method at $x = 0$, as a function of $k, N and σ$. You can assume that $k$ only takes the values $k = 2k′ + 1$ with $k′ ≥ 0$ an integer value chosen in ${0, 1, . . . ,N′}$.
+    with $N′ > 1$ an arbitrary integer value. The $N (= 2N′ + 1)$ points thus form an uniform grid in [−1; +1]. Using the result in (1), express analytically the bias and variance terms of the $kNN$ method at $x = 0$, as a function of $k$, $N$ and $σ$. You can assume that $k$ only takes the values $k = 2k′ + 1$ with $k′ ≥ 0$ an integer value chosen in ${0, 1, . . . ,N′}$.
 
 3. Discuss the impact of $N, k$, and $σ$ on bias and variance. Are there some surprising or missing dependences? If so, try and explain them.
 4. For all combinations of $N$ in ${25, 50}$ and $σ ∈ {0.0, 0.1, 0.2}$, determine the value $k∗$ of $k$ that minimizes the expected generalization error at $x = 0.^2$
