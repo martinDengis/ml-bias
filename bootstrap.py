@@ -10,13 +10,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+
 # Declare global variables
 X, y = load_wine_quality()
 random_state = np.random.RandomState(42)    # Create a RandomState instance
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")    # Generate a timestamp
 
+
 """
-Procedure:
+Bootstraping Procedure:
 
 - For i = 1 to B:
 	Take a bootstrap sample Bi from the data set.
@@ -38,8 +40,6 @@ Procedure:
 	    > The irreducible error can be estimated as the remaining error after accounting for bias and variance:
             Total Error = Bias² + Variance + Residual Error
 """
-
-
 def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[float, int]) -> tuple:
     """
     Perform bootstrap sampling and calculate bias, variance, and residual error.
@@ -55,9 +55,6 @@ def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[flo
         hyperparameter (float or int): Hyperparameter for the model (`alpha` for Lasso, `n_neighbors` for kNN, `max_depth` for Decision Tree).
     Returns:
         tuple: A tuple containing bias squared, variance, and residual error.
-    Example:
-        >>> bias_squared, variance, residual_error = bootstrap_sampling(100, 1000, 'lasso', 0.1)
-        >>> print(f"Bias^2: {bias_squared}, Variance: {variance}, Residual Error: {residual_error}")
     """
     # Initialize arrays for all input samples
     y_pred = np.zeros((len(X), B))
@@ -125,6 +122,9 @@ def output_plot(model: str, hyperparameter_name: str, results: np.ndarray) -> No
     ax.plot(hyperparameter_values, variance, '^-', label="Variance", color="green")  # triangles
     ax.plot(hyperparameter_values, error, 'D-', label="Error", color="blue")  # diamonds
 
+    if model.lower() == "lasso":
+        ax.set_xscale('log')
+
     ax.set_xlabel(f"Hyperparameter ({hyperparameter_name})")
     ax.set_ylabel("Error")
     ax.set_title(f"{model.capitalize()} Reg. Bias-Variance Decomposition")
@@ -175,18 +175,25 @@ def run_bootstrap(model: str, hyperparameters: list, hyperparameter_name: str, B
 
 
 if __name__ == "__main__":
-
     # Set variables and hyperparameters
     B = 10000  # number of bootstrap samples
     n_samples = 250  # fixed as per the statement
-    alphas = [0.1, 0.01, 0.001] # Lasso hyperparameters
-    ks = [1, 5, 10] # kNN hyperparameters
-    max_depths = [5, 10, 20]    # Decision Tree hyperparameters
 
-    # Create models dictionary with (model_type: [hyperparameters, hyperparameter_name])
+    alphas = [] # Lasso hyperparameters
+    alphas = [10**exponent for exponent in range(-3, 0)] + \
+             [2 * 10**exponent for exponent in range(-3, 0)] + \
+             [5 * 10**exponent for exponent in range(-3, 0)]
+    alphas.append(1)
+    alphas.append(2)
+    alphas.sort()
+
+    ks = [1, 2, 3, 4, 5, 7, 10, 15, 20, 30] # kNN hyperparameters
+    max_depths = [1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50]    # Decision Tree hyperparameters
+
+    # Create models dictionary with {model_type: [hyperparameters, hyperparameter_name]}
     models = {
         "lasso": [alphas, "alpha"],
-        "knn": [ks, "k"],
+        "knn": [ks, "k"],   # takes a very long time to run, might want to comment it out
         "tree": [max_depths, "max_depth"]
     }
 
