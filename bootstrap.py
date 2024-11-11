@@ -38,6 +38,8 @@ Bootstraping Procedure:
 	    > The irreducible error can be estimated as the remaining error after accounting for bias and variance:
             Total Error = Bias² + Variance + Residual Error
 """
+
+
 def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[float, int]) -> tuple:
     """
     Perform bootstrap sampling and calculate bias, variance, and residual error.
@@ -56,7 +58,7 @@ def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[flo
     """
     # Initialize arrays for all input samples
     y_pred = np.zeros((len(X), B))
-    oob_counts = np.zeros(len(X)) # see below for explanation
+    oob_counts = np.zeros(len(X))  # see below for explanation
 
     for i in range(B):
         # Get indices for bootstrap sample and perform sampling
@@ -90,13 +92,13 @@ def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[flo
 
     # Calculate metrics
     mean_predictions = np.sum(oob_predictions, axis=1) / oob_counts
-        # below we use np.mean to get average variance across all samples
-        # -> random var X and not individual variances of x's
-    bias_squared = np.mean((mean_predictions - true_values) ** 2)
+    # below we use np.mean to get average variance across all samples
+    # -> random var X and not individual variances of x's
+    bias_squared = np.mean((true_values - mean_predictions) ** 2)
     variance = np.mean(np.var(oob_predictions, axis=1))
-    residual_error = np.mean((true_values - mean_predictions) ** 2) - bias_squared - variance
+    expected_error = bias_squared + variance
 
-    return bias_squared, variance, residual_error
+    return bias_squared, variance, expected_error
 
 
 def output_plot(model: str, hyperparameter_name: str, results: np.ndarray) -> None:
@@ -111,14 +113,14 @@ def output_plot(model: str, hyperparameter_name: str, results: np.ndarray) -> No
     hyperparameter_values = results[:, 0]
     bias_squared = results[:, 1]
     variance = results[:, 2]
-    error = results[:, 1] + results[:, 2]
+    expected_error = results[:, 3]
 
     fig = plt.figure()
     ax = plt.subplot(111)
 
     ax.plot(hyperparameter_values, bias_squared, 's-', label="Bias²", color="red")  # squares
     ax.plot(hyperparameter_values, variance, '^-', label="Variance", color="green")  # triangles
-    ax.plot(hyperparameter_values, error, 'D-', label="Error", color="blue")  # diamonds
+    ax.plot(hyperparameter_values, expected_error, 'D-', label="Error", color="blue")  # diamonds
 
     if model.lower() == "lasso":
         ax.set_xscale('log')
@@ -140,7 +142,7 @@ def output_plot(model: str, hyperparameter_name: str, results: np.ndarray) -> No
     print(f"Plot for {model} regression saved to {model}/plot_{timestamp}.png")
 
 
-def run_bootstrap(model: str, hyperparameters: list, hyperparameter_name: str, B: int = 1000, n_samples: int=250) -> None:
+def run_bootstrap(model: str, hyperparameters: list, hyperparameter_name: str, B: int = 1000, n_samples: int = 250) -> None:
     """
     Run bootstrap sampling for a given model type and hyperparameters, and save the results.
 
@@ -151,15 +153,15 @@ def run_bootstrap(model: str, hyperparameters: list, hyperparameter_name: str, B
         B (int): Number of bootstrap samples. Default is 1000.
         n_samples (int): Number of samples to draw in each bootstrap sample. Default is 250.
     """
-    headers = [hyperparameter_name.capitalize(), "Bias^2", "Variance", "Residual Error"]
+    headers = [hyperparameter_name.capitalize(), "Bias^2 + Residual Error", "Variance", "Expected Error"]
     results = []
 
     output_file = os.path.join(model, f"results_{timestamp}.txt")
 
     print(f"----------\n{model.capitalize()} Regression")
     for hyperparameter in hyperparameters:
-        bias_squared, variance, residual_error = bootstrap(n_samples, B, model_type=model, hyperparameter=hyperparameter)
-        result = [hyperparameter, bias_squared, variance, residual_error]
+        bias_squared, variance, expected_error = bootstrap(n_samples, B, model_type=model, hyperparameter=hyperparameter)
+        result = [hyperparameter, bias_squared, variance, expected_error]
         results.append(result)
 
         with open(output_file, "a", encoding="utf-8") as f:
@@ -177,7 +179,7 @@ if __name__ == "__main__":
     B = 10000  # number of bootstrap samples
     n_samples = 250  # fixed as per the statement
 
-    alphas = [] # Lasso hyperparameters
+    alphas = []  # Lasso hyperparameters
     alphas = [10**exponent for exponent in range(-3, 0)] + \
              [2 * 10**exponent for exponent in range(-3, 0)] + \
              [5 * 10**exponent for exponent in range(-3, 0)]
@@ -185,14 +187,14 @@ if __name__ == "__main__":
     alphas.append(2)
     alphas.sort()
 
-    ks = [1, 2, 3, 4, 5, 7, 10, 15, 20, 30] # kNN hyperparameters
-    max_depths = [1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50]    # Decision Tree hyperparameters
+    ks = [1, 2, 3, 5, 7, 10, 20, 30]  # kNN hyperparameters
+    max_depths = [1, 2, 3, 5, 7, 10, 20, 30]    # Decision Tree hyperparameters
 
     # Create models dictionary with {model_type: [hyperparameters, hyperparameter_name]}
     models = {
-        "lasso": [alphas, "alpha"],
-        "knn": [ks, "k"],   # takes a very long time to run, might want to comment it out
-        "tree": [max_depths, "max_depth"]
+        # "lasso": [alphas, "alpha"],
+        "knn": [ks, "k"],   # takes very long, might want to comment it out
+        # "tree": [max_depths, "max_depth"]
     }
 
     # Run bootstrap sampling for each model type

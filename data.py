@@ -1,6 +1,9 @@
 from sklearn.datasets import fetch_openml
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import shuffle
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 # You can use this function in a script (located in the same folder) like this:
 #
@@ -32,3 +35,15 @@ def load_wine_quality():
     X, y = shuffle(X, y, random_state=42)
 
     return X, y
+
+
+if __name__ == "__main__":
+    X, y = load_wine_quality()
+    data = pd.DataFrame(X, columns=[f"Feature {i}" for i in range(X.shape[1])])
+    data['Quality'] = y
+
+    # sns.pairplot(data)
+
+    correlation_matrix = data.corr()
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+    plt.show()
