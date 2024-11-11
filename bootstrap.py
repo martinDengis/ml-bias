@@ -24,8 +24,6 @@ Bootstraping Procedure:
 	Take a bootstrap sample Bi from the data set.
 	Learn a model fi on it.
 
-- For each object, compute the expected error of all models that were built without it (about 30%). We thus use out-of-bag (OOB) samples (the ~30% of data not included in each bootstrap sample) as our test set.
-
 - For each data point x that appears as an OOB sample across different bootstrap iterations:
 	Variance:
 	    > We calculate the variance of predictions made by the different models where x was OOB
