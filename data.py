@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+
 # You can use this function in a script (located in the same folder) like this:
 #
 # from data import load_wine_quality
@@ -35,6 +36,7 @@ def load_wine_quality():
     X, y = shuffle(X, y, random_state=42)
 
     return X, y
+
 
 
 if __name__ == "__main__":
