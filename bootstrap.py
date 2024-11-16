@@ -9,6 +9,7 @@ import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from sklearn.ensemble import BaggingRegressor, AdaBoostRegressor
 
 
 # Declare global variables
@@ -40,7 +41,7 @@ Bootstraping Procedure:
 """
 
 
-def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[float, int]) -> tuple:
+def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[float, int] = None, n_estimators: int = None) -> tuple:
     """
     Perform bootstrap sampling and calculate bias, variance, and residual error.
 
@@ -49,10 +50,12 @@ def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[flo
         B (int): Number of bootstrap samples.
         model_type (str): Type of model to use.
 
-            Available models are 'lasso', 'knn', and 'tree' (from sklearn).
+            Available models are 'lasso', 'knn', 'tree', 'bagging', 'boosting' (from sklearn).
             Else ValueError is raised.
 
-        hyperparameter (float or int): Hyperparameter for the model (`alpha` for Lasso, `n_neighbors` for kNN, `max_depth` for Decision Tree).
+        hyperparameter (float or int): Hyperparameter for the base model (e.g., max_depth for Decision Tree).
+        n_estimators (int): Number of estimators for ensemble models like Bagging or Boosting.
+
     Returns:
         tuple: A tuple containing bias squared, variance, and residual error.
     """
@@ -74,6 +77,20 @@ def bootstrap(n_samples: int, B: int, model_type: str, hyperparameter: Union[flo
             model = KNeighborsRegressor(n_neighbors=hyperparameter)
         elif model_type == 'tree':
             model = DecisionTreeRegressor(max_depth=hyperparameter)
+        elif model_type == 'tree_fully_grown':
+            model = DecisionTreeRegressor()
+        elif model_type == 'bagging':
+            model = BaggingRegressor(
+                estimator=DecisionTreeRegressor(max_depth=hyperparameter),
+                n_estimators=n_estimators,
+                random_state=42,
+            )
+        elif model_type == 'boosting':
+            model = AdaBoostRegressor(
+                estimator=DecisionTreeRegressor(max_depth=hyperparameter),
+                n_estimators=n_estimators,
+                random_state=42,
+            )
         else:
             raise ValueError("Unsupported model type")
 
@@ -106,7 +123,7 @@ def output_plot(model: str, hyperparameter_name: str, results: np.ndarray) -> No
     Output a plot of the results.
 
     Parameters:
-        folder (str): Folder to save the plot in.
+        model (str): Folder to save the plot in.
         hyperparameter_name (str): Name of the hyperparameter.
         results (np.ndarray): Results to plot.
     """
