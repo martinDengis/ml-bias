@@ -1,15 +1,14 @@
 import os
 import numpy as np
-from bootstrap import bootstrap
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 import datetime
+from bias_variance_analysis import train_and_evaluate_models
 
 # Global variables
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
 n_estimators_range = [1, 5, 10, 20, 50, 100, 200]  # Number of estimators for ensemble methods
 depth_range = [1, 2, 3, 5, 7, 10, 20, 30, None]  # Depth of the base learner (None = Fully Grown)
-B = 1000  # Number of bootstrap samples
 
 
 def output_plot_ensemble_results(method: str, depth: str, results: np.ndarray) -> None:
@@ -19,17 +18,17 @@ def output_plot_ensemble_results(method: str, depth: str, results: np.ndarray) -
     Parameters:
         method (str): Ensemble method ("bagging" or "boosting").
         depth (str): Depth of the base learner (e.g., "2", "5", "fully_grown").
-        results (np.ndarray): Results to plot containing n_estimators, bias², variance, and total error.
+        results (np.ndarray): Results to plot containing n_estimators, bias + residual, variance, and total error.
     """
     n_estimators = results[:, 0]
-    bias_squared = results[:, 1]
+    bias = results[:, 1]
     variance = results[:, 2]
     total_error = results[:, 3]
 
     fig = plt.figure()
     ax = plt.subplot(111)
 
-    ax.plot(n_estimators, bias_squared, 'o-', label="Bias²", color="red")
+    ax.plot(n_estimators, bias, 'o-', label="Bias + residual", color="red")
     ax.plot(n_estimators, variance, '^-', label="Variance", color="green")
     ax.plot(n_estimators, total_error, 's-', label="Total Error", color="blue")
 
@@ -60,6 +59,7 @@ def run_ensemble_analysis(method: str, n_estimators_range: list, depth_range: li
         depth_range (list): List of max_depth values for the base learner.
     """
     headers = ["n_estimators", "Bias^2 + Residual Error", "Variance", "Expected Error"]
+    depth_results = {}
 
     for max_depth in depth_range:
         depth_label = "fully_grown" if max_depth is None else str(max_depth)
@@ -68,15 +68,14 @@ def run_ensemble_analysis(method: str, n_estimators_range: list, depth_range: li
 
         print(f"----------\n{method.capitalize()} (Base Learner Depth: {depth_label})")
         for n_estimators in n_estimators_range:
-            # Compute bias, variance, and total error
-            bias_squared, variance, expected_error = bootstrap(
+            # Compute bias, variance, and total error using train_and_evaluate_models
+            expected_error, avg_bias, avg_variance = train_and_evaluate_models(
                 n_samples=250,
-                B=B,
                 model_type=method,
                 hyperparameter=max_depth,
                 n_estimators=n_estimators,
             )
-            result = [n_estimators, bias_squared, variance, expected_error]
+            result = [n_estimators, avg_bias, avg_variance, expected_error]
             results.append(result)
 
             # Write results to a text file
@@ -88,7 +87,52 @@ def run_ensemble_analysis(method: str, n_estimators_range: list, depth_range: li
 
         # Convert results to NumPy array and save plot
         results = np.array(results)
+        # Store results for this depth
+        depth_results[depth_label] = np.array(results)
+
         output_plot_ensemble_results(method, depth_label, results)
+        plot_depth_comparison_simple(method, depth_results)
+
+
+def plot_depth_comparison_simple(method: str, depth_results: dict) -> None:
+    """
+    Plots comparisons of Bias + residual error, Variance, and Total Error across different depths,
+    with a separate plot for each metric.
+
+    Parameters:
+        method (str): Ensemble method ("bagging" or "boosting").
+        depth_results (dict): Dictionary containing results for each depth.
+                              Keys are depths (str), values are NumPy arrays of results.
+    """
+    # Prepare figure
+    metrics = ["Bias + residual error", "Variance", "Total Error"]
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))  # 3 side-by-side plots
+
+    for depth_label, results in depth_results.items():
+        n_estimators = results[:, 0]
+        bias = results[:, 1]
+        variance = results[:, 2]
+        total_error = results[:, 3]
+
+        # Plot each metric on its respective subplot
+        axes[0].plot(n_estimators, bias, label=f"Depth {depth_label}", marker='o')
+        axes[1].plot(n_estimators, variance, label=f"Depth {depth_label}", marker='^')
+        axes[2].plot(n_estimators, total_error, label=f"Depth {depth_label}", marker='s')
+
+    # Configure plots
+    for i, ax in enumerate(axes):
+        ax.set_xlabel("Number of Estimators")
+        ax.set_ylabel(metrics[i])
+        ax.set_title(f"{metrics[i]} Comparison")
+        ax.legend(loc="best")
+
+    # Save the plots
+    folder = f"ensemble_analysis/{method}"
+    os.makedirs(folder, exist_ok=True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(folder, f"depth_comparison_{timestamp}.png"))
+    plt.close()
+    print(f"Comparison plot for {method} saved in {folder}/depth_comparison_{timestamp}.png")
 
 
 if __name__ == "__main__":
