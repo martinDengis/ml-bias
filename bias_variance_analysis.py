@@ -131,7 +131,7 @@ def output_plot(model: str, hyperparameter_name: str, results: np.ndarray) -> No
 def run_train_eval(model: str, hyperparameters: list, hyperparameter_name: str, n_samples: int = 250) -> None:
     """
     Trains and evaluates a regression model with varying hyperparameters,
-    and logs the results to a file and prints them to the console.
+    and logs the results to a file as well as plot them.
     Args:
         model (str): The type of regression model to train (e.g., 'lasso', 'knn', etc).
         hyperparameters (list): A list of hyperparameter values to evaluate.
