@@ -24,9 +24,9 @@ def output_plot_sample_size(model: str, results: np.ndarray) -> None:
         results (np.ndarray): Results to plot containing sample sizes, bias + residual error, variance, and expected error.
     """
     sample_sizes = results[:, 0]
-    bias = results[:, 1]
-    variance = results[:, 2]
-    expected_error = results[:, 3]
+    expected_error = results[:, 1]
+    bias = results[:, 2]
+    variance = results[:, 3]
 
     fig = plt.figure()
     ax = plt.subplot(111)
@@ -62,13 +62,13 @@ def run_sample_size_tests(model: str, sample_sizes: list, hyperparameter: float,
         hyperparameter (float or int): Hyperparameter for the model (e.g., alpha for Lasso, k for kNN, max_depth for Decision Tree).
         hyperparameter_name (str): Name of the hyperparameter.
     """
-    headers = ["Sample Size", "Bias^2 + Residual Error", "Variance", "Expected Error"]
+    headers = ["Sample Size", "Expected Error" , "Bias + Residual Error", "Variance"]
     results = []
 
     output_file = os.path.join("sample_size", f"{model}_results_{timestamp}.txt")
     os.makedirs("sample_size", exist_ok=True)
 
-    print(f"----------\n{model.capitalize()} Regression Sample Size Testing")
+    print(f"----------\n{model.capitalize()} Regression Sample Size")
     for n_samples in sample_sizes:
         # Use train_and_evaluate_models to calculate bias, variance, and total error
         expected_error, avg_bias, avg_variance = train_and_evaluate_models(
@@ -76,16 +76,16 @@ def run_sample_size_tests(model: str, sample_sizes: list, hyperparameter: float,
             model_type=model,
             hyperparameter=hyperparameter
         )
-        result = [n_samples, avg_bias, avg_variance, expected_error]
+        result = [n_samples,expected_error, avg_bias, avg_variance]
         results.append(result)
 
-        # Write results to a text file
-        with open(output_file, "a", encoding="utf-8") as f:
-            f.write(f"Sample Size Results: {hyperparameter_name}={hyperparameter}, N={n_samples}\n")
-            f.write(tabulate([result], headers=headers, tablefmt="fancy_grid"))
-            f.write("\n\n")
+    # Write results to a text file
+    with open(output_file, "a", encoding="utf-8") as f:
+        f.write(f"Sample Size Results: \n")
+        f.write(tabulate(results, headers=headers, tablefmt="fancy_grid"))
+        f.write("\n\n")
 
-        print(f"Results for sample size={n_samples} written to {output_file}")
+    print(f"Results for sample size={n_samples} written to {output_file}")
 
     # Convert results to a NumPy array for plotting
     results = np.array(results)
