@@ -153,14 +153,13 @@ def run_train_eval(model: str, hyperparameters: list, hyperparameter_name: str, 
         result = [hyperparameter, error, bias, variance]
         results.append(result)
 
-        with open(output_file, "a", encoding="utf-8") as f:
-            f.write(
-                f"Bootstrap Results: {hyperparameter_name}={hyperparameter}\n")
-            f.write(tabulate([result], headers=headers, tablefmt="fancy_grid"))
-            f.write("\n\n")
+    # Write all results to the file at once
+    with open(output_file, "a", encoding="utf-8") as f:
+        f.write(f"Training Results:\n")
+        f.write(tabulate(results, headers=headers, tablefmt="fancy_grid"))
+        f.write("\n\n")
 
-        print(
-            f"Results for {hyperparameter_name}={hyperparameter} written to {output_file}")
+    print(f"Results written to {output_file}")
 
     output_plot(model, hyperparameter_name, np.array(results))
 
@@ -187,7 +186,7 @@ if __name__ == "__main__":
         "tree": [max_depths, "max_depth"]
     }
 
-    # Run bootstrap sampling for each model type
+    # Run training and evaluation for each model type and hyperparameter
     for model, hyperparameters in models.items():
         os.makedirs(model, exist_ok=True)
         run_train_eval(
