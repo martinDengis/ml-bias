@@ -1,4 +1,4 @@
-# (ELEN0062) Project 2 - Bias and variance analysis
+# Project 2 - Bias and variance analysis
 *October 23rd, 2024*
 
 The goal of this second assignment is to help you better understand the important notions of bias and variance. The first part is purely theoretical, while the second part requires to perform some experiments with Scikit-learn. You should hand in a brief report giving your developments, observations and conclusions along with the scripts you have implemented to answer the questions of the second part. The project must be carried out by groups of at most three students and submitted on Gradescope1 before $November 22, 23:59 GMT+2$. There will be two projects to submit to: one for your python scripts and
