@@ -8,20 +8,20 @@ one for your report.
 Let us consider a unidimensional regression problem $y = f(x) + ϵ$ where $ϵ ∼ N(0, σ^2)$ and let $LS = {(x^1, y^1), . . . , (x^N, y^N)}$ denote the learning sample (of fixed size $N$). To simplify the analysis, we further assume that the input values $x^i$ of the N learning sample examples are fixed in advance, i.e., only their outputs $y^i$ are random.
 1. Show that the expected generalization error of the $k$-Nearest Neighbours algorithm at some point $x$ can be decomposed as follows
 
-    $E_{LS}\left\{ E_{y|x} \left\{ \left( y - \hat{y}(x; LS, k) \right)^2 \right\} \right\} = \sigma^2 + \left[ f(x) - \frac{1}{k} \sum_{l=1}^{k} f(x_{(l)}) \right]^2 + \frac{\sigma^2}{k}$
+    $`E_{LS} \{ E_{y|x} \{ ( y - \hat{y}(x; LS, k) )^2 \} \} = \sigma^2 + [ f(x) - \frac{1}{k} \sum_{l=1}^{k} f(x_{(l)}) ]^2 + \frac{\sigma^2}{k}`$
 
 2. Let us now assume that the problem is unidimensional, i.e., $x ∈ R$, that $f(x) = x^2$, and that for a given $N$, the inputs of the training examples are defined as follows:
 
-   $\{x^1, \ldots, x^N\} = \{0\} \cup \left\{ \frac{i}{N'} \, \bigg| \, i = 1, \ldots, N' \right\} \cup \left\{ -\frac{i}{N'} \, \bigg| \, i = 1, \ldots, N' \right\}$
+   $`\{x^1, \ldots, x^N\} = \{0\} \cup \{ \frac{i}{N\prime} \, \bigg| \, i = 1, \ldots, N\prime \} \cup \{ -\frac{i}{N\prime} \, \bigg| \, i = 1, \ldots, N\prime \}`$
 
-    with $N′ > 1$ an arbitrary integer value. The $N (= 2N′ + 1)$ points thus form an uniform grid in [−1; +1]. Using the result in (1), express analytically the bias and variance terms of the $kNN$ method at $x = 0$, as a function of $k$, $N$ and $σ$. You can assume that $k$ only takes the values $k = 2k′ + 1$ with $k′ ≥ 0$ an integer value chosen in ${0, 1, . . . ,N′}$.
+    with $N\prime > 1$ an arbitrary integer value. The $N (= 2N\prime + 1)$ points thus form an uniform grid in [−1; +1]. Using the result in (1), express analytically the bias and variance terms of the $kNN$ method at $x = 0$, as a function of $k$, $N$ and $σ$. You can assume that $k$ only takes the values $k = 2k\prime + 1$ with $k\prime ≥ 0$ an integer value chosen in ${0, 1, . . . ,N\prime}$.
 
 3. Discuss the impact of $N, k$, and $σ$ on bias and variance. Are there some surprising or missing dependences? If so, try and explain them.
 4. For all combinations of $N$ in ${25, 50}$ and $σ ∈ {0.0, 0.1, 0.2}$, determine the value $k∗$ of $k$ that minimizes the expected generalization error at $x = 0.^2$
 5. Discuss the impact of $N$ and $σ$ on $k∗$.
 
 ## 2. Empirical analysis
-In this section, we assume that we have access to a (large) dataset (or pool) of $N_S$ pairs $P = {(x1, y1), . . . , (x_NS , y_NS)}$ from which we would like to design an experiment to estimate the bias and variance of several learning algorithms. We assume that $N_S$ is large with respect to the size $N$ of learning samples for which we want to estimate bias and variance. In the questions below, the different terms are to be understood as their mean over the input space ($E_x$), not at a particular point $x_0$ as in the previous section.
+In this section, we assume that we have access to a (large) dataset (or pool) of $N_S$ pairs $P = {(x1, y1), . . . , (x_{N_S} , y_{N_S})}$ from which we would like to design an experiment to estimate the bias and variance of several learning algorithms. We assume that $N_S$ is large with respect to the size $N$ of learning samples for which we want to estimate bias and variance. In the questions below, the different terms are to be understood as their mean over the input space ($E_x$), not at a particular point $x_0$ as in the previous section.
 
 **Data.** For the experiments below, we propose to use the *Wine Quality* dataset available on OpenML. This dataset contains $N_S = 6 497$ samples, described by 11 input features. The goal is to predict a score between 0 and 10 for how good a wine is based on its characteristics, such as sulfites.
 
